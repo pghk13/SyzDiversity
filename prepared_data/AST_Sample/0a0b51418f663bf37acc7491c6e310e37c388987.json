@@ -1,0 +1,147 @@
+{
+  "calls": [
+    {
+      "name": "openat$iommufd",
+      "args": [
+        {
+          "type": "*prog.ConstArg",
+          "value": 18446744073709551516
+        },
+        {
+          "type": "*prog.PointerArg",
+          "value": 128,
+          "sub_args": [
+            {
+              "type": "*prog.DataArg",
+              "value": "2f6465762f696f6d6d7500"
+            }
+          ]
+        },
+        {
+          "type": "*prog.ConstArg",
+          "value": 0
+        },
+        {
+          "type": "*prog.ConstArg",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "name": "ioctl$IOMMU_IOAS_ALLOC",
+      "args": [
+        {
+          "type": "*prog.ResultArg",
+          "value": "ref=0"
+        },
+        {
+          "type": "*prog.ConstArg",
+          "value": 15233
+        },
+        {
+          "type": "*prog.PointerArg",
+          "value": 512,
+          "sub_args": [
+            {
+              "type": "*prog.GroupArg",
+              "sub_args": [
+                {
+                  "type": "*prog.ConstArg",
+                  "value": 21
+                },
+                {
+                  "type": "*prog.ConstArg",
+                  "value": 0
+                },
+                {
+                  "type": "*prog.ResultArg",
+                  "value": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ioctl$IOMMU_VFIO_IOAS$SET",
+      "args": [
+        {
+          "type": "*prog.ResultArg",
+          "value": "ref=0"
+        },
+        {
+          "type": "*prog.ConstArg",
+          "value": 15240
+        },
+        {
+          "type": "*prog.PointerArg",
+          "value": 704,
+          "sub_args": [
+            {
+              "type": "*prog.GroupArg",
+              "sub_args": [
+                {
+                  "type": "*prog.ConstArg",
+                  "value": 12
+                },
+                {
+                  "type": "*prog.ResultArg",
+                  "value": "ref=0"
+                },
+                {
+                  "type": "*prog.ConstArg",
+                  "value": 1
+                },
+                {
+                  "type": "*prog.ConstArg",
+                  "value": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ioctl$IOMMU_VFIO_IOAS$GET",
+      "args": [
+        {
+          "type": "*prog.ResultArg",
+          "value": "ref=0"
+        },
+        {
+          "type": "*prog.ConstArg",
+          "value": 15240
+        },
+        {
+          "type": "*prog.PointerArg",
+          "value": 256,
+          "sub_args": [
+            {
+              "type": "*prog.GroupArg",
+              "sub_args": [
+                {
+                  "type": "*prog.ConstArg",
+                  "value": 12
+                },
+                {
+                  "type": "*prog.ResultArg",
+                  "value": 0
+                },
+                {
+                  "type": "*prog.ConstArg",
+                  "value": 0
+                },
+                {
+                  "type": "*prog.ConstArg",
+                  "value": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
