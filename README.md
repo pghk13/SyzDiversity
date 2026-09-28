@@ -8,17 +8,31 @@
 
 ![Approach Overview](fig/approach_overview.png)
 
-SyzDiversity extends syzkaller with diversity-guided corpus construction, seed
-scheduling, and mutation. It starts from vulnerability-derived proof-of-concept
-(PoC) seeds, partitions their abstract syntax trees (ASTs) into communities, and
-uses the community popularity rate (CPR) to guide exploration alongside coverage
-feedback.
+While coverage-guided kernel fuzzers have been proposed to uncover Linux kernel
+vulnerabilities, their code coverage and bug-finding capability are limited due
+to the lack of seed diversity, which is caused by the compounding effect of
+initial seed generation, seed scheduling, and seed mutation. To address this
+limitation, we propose a diversity-guided kernel fuzzer SyzDiversity.
 
-The paper reports a 17.4% improvement in code coverage and a 9.1× improvement in
-bug-finding capability over the evaluated state-of-the-art fuzzers, with
-experiments on Linux v5.15 and v6.14. It also reports 32 unique new vulnerabilities,
-12 confirmed. These are the paper's experimental results, not results produced
-by the regression tests below.
+Specifically, to mitigate overvaluation of early seeds, it leverages
+proof-of-concept (PoC) seeds derived from real-world vulnerabilities as initial
+seeds, and further partitions these seeds into multiple communities. To improve
+diversity guidance in seed scheduling, it leverages a novel metric, community
+popularity rate (CPR), to model community diversity, and introduces a CPR-aware
+hierarchical Multi-Armed Bandit (MAB) algorithm that integrates CPR and code
+coverage as reward signals to prioritize the scheduling of diverse seed
+communities and seeds.
+
+Further, to efficiently populate sparse communities or break through community
+boundaries, it adopts a CPR-guided seed mutation strategy that adaptively
+allocates higher mutation frequencies to communities that are more conducive to
+the diversity evolution of the seeds.
+
+Our extensive experiments on Linux kernel versions v5.15 and v6.14 have
+demonstrated that SyzDiversity improves code coverage and bug-finding capability
+by 17.2% and 6.4×, respectively, compared to the state-of-the-art kernel
+fuzzers. It has discovered 32 unique new vulnerabilities, with 12 of them
+confirmed.
 
 ## Method
 
