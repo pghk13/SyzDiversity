@@ -1,60 +1,63 @@
-# SyzDiversity: Diversity-Guided Linux Kernel Fuzzing
+<div align="center">
+
+# 🧬 SyzDiversity
+
+**Diversity-Guided Linux Kernel Fuzzing**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](SyzDiversity_code/LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-green.svg)](https://python.org/)
 [![Linux](https://img.shields.io/badge/Platform-Linux-yellow.svg)](https://kernel.org/)
 
-## Overview
+[Overview](#overview) · [Method](#method) · [Setup](#requirements) · [Communities](#prepare-the-initial-communities) · [Run](#configure-and-run) · [Tests](#tests)
+
+</div>
+
+---
+
+<a id="overview"></a>
+
+## 📖 Overview
 
 ![Approach Overview](fig/approach_overview.png)
 
-While coverage-guided kernel fuzzers have been proposed to uncover Linux kernel
-vulnerabilities, their code coverage and bug-finding capability are limited due
-to the lack of seed diversity, which is caused by the compounding effect of
-initial seed generation, seed scheduling, and seed mutation. To address this
-limitation, we propose a diversity-guided kernel fuzzer SyzDiversity.
+While coverage-guided kernel fuzzers have been proposed to uncover Linux kernel vulnerabilities, their code coverage and bug-finding capability are limited due to the lack of seed diversity, which is caused by the compounding effect of initial seed generation, seed scheduling, and seed mutation. To address this limitation, we propose a diversity-guided kernel fuzzer SyzDiversity. Specifically, to mitigate overvaluation of early seeds, it leverages proof-of-concept (PoC) seeds derived from real-world vulnerabilities as initial seeds, and further partitions these seeds into multiple communities. To improve diversity guidance in seed scheduling, it leverages a novel metric, community popularity rate (CPR), to model community diversity, and introduces a CPR-aware hierarchical Multi-Armed Bandit (MAB) algorithm that integrates CPR and code coverage as reward signals to prioritize the scheduling of diverse seed communities and seeds. Further, to efficiently populate sparse communities or break through community boundaries, it adopts a CPR-guided seed mutation strategy that adaptively allocates higher mutation frequencies to communities that are more conducive to the diversity evolution of the seeds. Our extensive experiments on Linux kernel versions v5.15 and v6.14 have demonstrated that SyzDiversity improves code coverage and bug-finding capability by 17.2% and 6.4×, respectively, compared to the state-of-the-art kernel fuzzers. It has discovered 32 unique new vulnerabilities, with 12 of them confirmed.
 
-Specifically, to mitigate overvaluation of early seeds, it leverages
-proof-of-concept (PoC) seeds derived from real-world vulnerabilities as initial
-seeds, and further partitions these seeds into multiple communities. To improve
-diversity guidance in seed scheduling, it leverages a novel metric, community
-popularity rate (CPR), to model community diversity, and introduces a CPR-aware
-hierarchical Multi-Armed Bandit (MAB) algorithm that integrates CPR and code
-coverage as reward signals to prioritize the scheduling of diverse seed
-communities and seeds.
+### 📊 Results at a glance
 
-Further, to efficiently populate sparse communities or break through community
-boundaries, it adopts a CPR-guided seed mutation strategy that adaptively
-allocates higher mutation frequencies to communities that are more conducive to
-the diversity evolution of the seeds.
+| Code coverage improvement | Bug-finding improvement | New vulnerabilities | Confirmed |
+| :---: | :---: | :---: | :---: |
+| **17.2%** | **6.4×** | **32** | **12** |
 
-Our extensive experiments on Linux kernel versions v5.15 and v6.14 have
-demonstrated that SyzDiversity improves code coverage and bug-finding capability
-by 17.2% and 6.4×, respectively, compared to the state-of-the-art kernel
-fuzzers. It has discovered 32 unique new vulnerabilities, with 12 of them
-confirmed.
+*Paper results on Linux v5.15 and v6.14.*
 
-## Method
+<a id="method"></a>
 
-- **Weighted AST partitioning.** The exporter and online classifier use the same
+## 🧠 Method
+
+- 🧩 **Weighted AST partitioning.** The exporter and online classifier use the same
   ordered AST representation. Tree edit distance assigns cost 5 to syscall nodes,
   cost 1 to ordinary argument nodes, and cost 0 to pointer addresses and
   normalized image/ANY/AUTO fields. The default similarity is
   `1 - TED / max(node counts)`, exposed as `NTED2`.
-- **Community construction.** A symmetrized 200-nearest-neighbor graph retains
+
+- 🔗 **Community construction.** A symmetrized 200-nearest-neighbor graph retains
   positive similarities and excludes self-edges. Louvain partitions the graph;
   isolated seeds remain present. Each community, including singletons, gets a
   fixed medoid under normalized tree distance.
-- **Hierarchical scheduling.** Community and seed selection use historical UCB
+
+- 🎯 **Hierarchical scheduling.** Community and seed selection use historical UCB
   rewards. Community rewards combine crash-weighted new coverage with CPR. Seed
   rewards average offspring coverage gain per execution time, weighted by actual
   crash status. Zero-gain executions still contribute to the average.
-- **CPR-guided mutation.** The two highest-CPR communities receive batches of 25
+
+- 🔄 **CPR-guided mutation.** The two highest-CPR communities receive batches of 25
   independent mutations; other communities receive one mutation per selection.
   Visits are counted once per parent selection and rewards once per completed
   batch. Triage and minimization reruns do not earn mutation rewards.
 
-## Repository Layout
+<a id="repository-layout"></a>
+
+## 🗂️ Repository Layout
 
 ```text
 SyzDiversity/
@@ -81,18 +84,23 @@ SyzDiversity/
 └── fig/                                     # Paper figures
 ```
 
-## Requirements
+<a id="requirements"></a>
 
-- A Linux host with QEMU/KVM for the Linux/amd64 workflow below.
-- Go 1.22.1 or newer, as declared in `SyzDiversity_code/go.mod`.
-- Python 3.8 or newer for offline partitioning.
-- Make, a C/C++ toolchain, and the dependencies needed to build the target kernel.
-- A coverage-enabled kernel, a bootable VM image, and an SSH key for the guest.
+## 🛠️ Requirements
 
-Pairwise distance calculation performs `N * (N - 1) / 2` comparisons. Each dense
-float32 matrix uses `4 * N * N` bytes on disk; graph construction also creates
-in-memory copies and sorting arrays. Budget memory beyond the two matrix files
-and start with a small corpus before processing the full dataset.
+| Component | Requirement |
+| :--- | :--- |
+| **Host** | A Linux host with QEMU/KVM for the Linux/amd64 workflow below. |
+| **Go** | Go 1.22.1 or newer, as declared in `SyzDiversity_code/go.mod`. |
+| **Python** | Python 3.8 or newer for offline partitioning. |
+| **Build toolchain** | Make, a C/C++ toolchain, and the dependencies needed to build the target kernel. |
+| **Kernel & guest** | A coverage-enabled kernel, a bootable VM image, and an SSH key for the guest. |
+
+> [!TIP]
+> Pairwise distance calculation performs `N * (N - 1) / 2` comparisons. Each dense
+> float32 matrix uses `4 * N * N` bytes on disk; graph construction also creates
+> in-memory copies and sorting arrays. Budget memory beyond the two matrix files
+> and start with a small corpus before processing the full dataset.
 
 ### 1. Set up paths and Python dependencies
 
@@ -143,17 +151,21 @@ Enable KCOV coverage collection and configure the guest for SSH access and
 Keep the kernel build directory: the manager needs it for symbolization as well
 as the bootable kernel image.
 
-## Prepare the Initial Communities
+<a id="prepare-the-initial-communities"></a>
 
-Complete offline partitioning **before** starting the manager. Corpus hashes,
-ASTs, labels, and medoids must come from the same corpus and target. Regenerate
-older ASTs and partition files with this implementation rather than mixing them
-with newly computed distances.
+## 🧩 Prepare the Initial Communities
+
+> [!IMPORTANT]
+> Complete offline partitioning **before** starting the manager. Corpus hashes,
+> ASTs, labels, and medoids must come from the same corpus and target. Regenerate
+> older ASTs and partition files with this implementation rather than mixing them
+> with newly computed distances.
 
 ### 1. Export ASTs from a corpus copy
 
-The database loader may compact an opened database. Export from a working copy,
-not the original dataset or a running manager's database.
+> [!WARNING]
+> The database loader may compact an opened database. Export from a working copy,
+> not the original dataset or a running manager's database.
 
 ```bash
 mkdir -p "$RUN/partition"
@@ -238,11 +250,14 @@ conflicting medoids stop initialization. If `cluster_info.csv` is absent, the
 manager logs a fallback to online assignment; that mode does not use the offline
 Louvain initialization described above.
 
-## Configure and Run
+<a id="configure-and-run"></a>
 
-Save the following as `$RUN/fuzzing.cfg`, replacing every `/path/to/...` value.
-JSON paths are literal: shell variables such as `$RUN` are not expanded there.
-The `syzkaller` path must point to **`SyzDiversity_code`**, not the repository root.
+## 🚀 Configure and Run
+
+> [!NOTE]
+> Save the following as `$RUN/fuzzing.cfg`, replacing every `/path/to/...` value.
+> JSON paths are literal: shell variables such as `$RUN` are not expanded there.
+> The `syzkaller` path must point to **`SyzDiversity_code`**, not the repository root.
 
 ```json
 {
@@ -270,10 +285,10 @@ The `syzkaller` path must point to **`SyzDiversity_code`**, not the repository r
 }
 ```
 
-### Diversity parameters
+### ⚙️ Diversity parameters
 
 | Setting | Default | Meaning |
-| --- | --- | --- |
+| :--- | :---: | :--- |
 | `syscall_cost` | `5` | Syscall-node edit cost; integer >= 1, shared with offline processing |
 | `cpr_weight` | `7` | CPR coefficient in the community reward; >= 1 |
 | `mutation_top` | `2` | Number of highest-CPR communities receiving 25-mutation batches; integer >= 1 |
@@ -287,7 +302,7 @@ UCB. The duration, probability, and batch size of 25 are code defaults, not
 manager JSON fields; the paper describes a small warm-up probability without
 specifying its numeric value.
 
-Start the manager:
+### ▶️ Start the manager
 
 ```bash
 set -o pipefail
@@ -302,7 +317,11 @@ set -o pipefail
   include `cluster_info.csv`, `cluster_core.csv`, and `ast_cache/`; cached centroid
   ASTs allow fixed medoids to survive corpus minimization.
 
-## Tests
+<a id="tests"></a>
+
+## 🧪 Tests
+
+### Go regression tests
 
 Run the focused Go regression tests from the fuzzer module:
 
@@ -311,6 +330,8 @@ cd "$REPO/SyzDiversity_code"
 go test -mod=vendor -race -short ./pkg/corpus ./pkg/fuzzer ./pkg/fuzzer/queue
 go test -mod=vendor -race -run '^TestDiversityConfig$' ./pkg/mgrconfig
 ```
+
+### Python partitioning tests
 
 Run offline partitioning tests in the Python environment created above:
 
@@ -324,11 +345,15 @@ assignment and persistence, historical reward accounting, mutation batches,
 configuration validation, graph filtering, and singleton medoids. They do not
 replace a Linux VM fuzzing campaign or reproduce the paper's performance results.
 
-## License
+<a id="license"></a>
+
+## 📄 License
 
 See the [Apache License 2.0](SyzDiversity_code/LICENSE).
 
-## Acknowledgments
+<a id="acknowledgments"></a>
+
+## 🙏 Acknowledgments
 
 - The [syzkaller](https://github.com/google/syzkaller) team for the underlying
   fuzzing framework.
