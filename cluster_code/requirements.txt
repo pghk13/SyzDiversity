@@ -1,0 +1,26 @@
+# Core scientific computing libraries
+numpy>=1.19.0
+pandas>=1.3.0
+
+# Network analysis and clustering
+networkx>=2.6.0
+python-louvain>=0.15
+
+# Machine learning and data processing
+scikit-learn>=1.0.0
+
+# Visualization libraries
+matplotlib>=3.3.0
+seaborn>=0.11.0
+
+# Tree edit distance computation
+edist>=1.2.0
+
+# Progress bars and utilities
+tqdm>=4.62.0
+
+# Enhanced pickle support for Python < 3.8
+pickle5>=0.0.11; python_version<'3.8'
+# Sparse graph construction and parallel distance calculation
+scipy>=1.8.0
+joblib>=1.2.0

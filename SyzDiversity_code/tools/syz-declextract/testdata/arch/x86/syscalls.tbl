@@ -1,0 +1,7 @@
+# Copyright 2025 SyzDiversity project authors. All rights reserved.
+# Use of this source code is governed by Apache 2 LICENSE that can be found in the LICENSE file.
+
+1	64	open			sys_open
+2	64	chmod			sys_chmod
+3	64	types_syscall		sys_types_syscall
+4	64	functions		sys_functions
